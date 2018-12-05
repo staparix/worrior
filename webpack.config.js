@@ -5,7 +5,7 @@ module.exports = function (env, argv) {
     return {
         mode: env.mode,
         entry: {
-            "app": "./src/app.ts"
+            "app": "./src/app.tsx"
         },
         output: {
             path: path.resolve(__dirname, "dist"),
@@ -21,7 +21,7 @@ module.exports = function (env, argv) {
                     include: [
                         path.resolve(__dirname, "src")
                     ],
-                    use:["awesome-typescript-loader"]
+                    use:["babel-loader", "awesome-typescript-loader"]
                 }
             ]
         },
