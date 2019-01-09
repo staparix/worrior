@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = function (env, argv) {
     return {
@@ -9,7 +10,7 @@ module.exports = function (env, argv) {
         },
         output: {
             path: path.resolve(__dirname, "dist"),
-            filename: "[name].js"
+            filename: "[name].[hash].js"
         },
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".jsx"]
@@ -22,6 +23,15 @@ module.exports = function (env, argv) {
                         path.resolve(__dirname, "src")
                     ],
                     use:["babel-loader", "awesome-typescript-loader"]
+                },
+                {
+                    test: /\.(png|jpg|gif|obj|mtl|babylon)$/,
+                    use: [
+                        {
+                            loader: 'file-loader',
+                            options: {}
+                        }
+                    ]
                 }
             ]
         },
@@ -29,7 +39,10 @@ module.exports = function (env, argv) {
             new HtmlWebpackPlugin({
                 title: "WB",
                 template: './src/index.html'
-            })
+            }),
+            new CopyWebpackPlugin([{
+                from: "assets", to: "assets"
+            }])
         ]
     }
 }

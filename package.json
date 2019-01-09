@@ -19,11 +19,16 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.2.0",
+    "@emotion/core": "^10.0.4",
     "@types/react": "^16.7.13",
     "@types/react-dom": "^16.0.11",
+    "@types/shortid": "^0.0.29",
     "awesome-typescript-loader": "^5.2.1",
     "babel-cli": "^6.26.0",
     "babel-loader": "^8.0.4",
+    "babel-plugin-emotion": "^10.0.4",
+    "copy-webpack-plugin": "^4.6.0",
+    "file-loader": "^2.0.0",
     "html-webpack-plugin": "^4.0.0-beta.4",
     "react-hot-loader": "^4.3.12",
     "tslint": "^5.11.0",
@@ -36,9 +41,12 @@
     "webpack-dev-server": "^3.1.10"
   },
   "dependencies": {
+    "babylonjs": "^4.0.0-alpha.11",
+    "babylonjs-loaders": "^3.3.0",
     "mobx": "^5.7.0",
     "mobx-react": "^5.4.2",
     "react": "^16.7.0-alpha.2",
-    "react-dom": "^16.7.0-alpha.2"
+    "react-dom": "^16.7.0-alpha.2",
+    "shortid": "^2.2.14"
   }
 }

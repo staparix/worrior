@@ -1,17 +1,13 @@
 import * as React from "react";
 import { render } from "react-dom";
+import { Shell } from "./shell/Shell";
 const rootElement = document.getElementById("app")!;
-const HelloWorld: React.FunctionComponent = () => {
-    const [count, setCounter] = React.useState(0);
-    const increment = () => {
-        setCounter(count + 1);
-    };
+const App: React.FunctionComponent = () => {
     return (
         <>
-            <div>Counter...{count}</div>
-            <button onClick={increment}>+</button>
+            <Shell />
         </>
     );
 };
 
-render(<HelloWorld />, rootElement);
+render(<App />, rootElement);
