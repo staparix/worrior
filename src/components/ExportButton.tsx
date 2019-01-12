@@ -5,6 +5,7 @@ import { css, jsx } from "@emotion/core";
 
 type ExportButtonProps = {
     onClick: () => void;
+    label: string;
 };
 
 const buttonStyle = css`
@@ -15,7 +16,12 @@ const buttonStyle = css`
 export class ExportButton extends React.Component<ExportButtonProps> {
     public render() {
         return (
-            <button css={buttonStyle} onClick={this.props.onClick}>Export</button>
+            <button
+                css={buttonStyle}
+                onClick={this.props.onClick}
+            >
+                {this.props.label}
+            </button>
         );
     }
 }

@@ -28,6 +28,7 @@ export type Entity = {
     category: Category;
     country: County;
     century: number;
+    material?: "metal",
     meta: {
         assetName: string;
         position?: {
@@ -52,6 +53,7 @@ export const fetchData = (): Entity[] => {
         {
             id: shortID.generate(),
             category: Category.Calf,
+            material: "metal",
             country: County.Finland,
             century: 15,
             meta: {
@@ -63,6 +65,7 @@ export const fetchData = (): Entity[] => {
             category: Category.Elbows,
             country: County.Finland,
             century: 15,
+            material: "metal",
             meta: {
                 assetName: "Eiropa.obj",
                 position: {
@@ -77,8 +80,14 @@ export const fetchData = (): Entity[] => {
             category: Category.Forearm,
             country: County.Finland,
             century: 15,
+            material: "metal",
             meta: {
                 assetName: "Eiropa_naruch.obj",
+                position: {
+                    x: 0,
+                    y: 0,
+                    z: 0,
+                }
             }
         },
         {
@@ -86,6 +95,7 @@ export const fetchData = (): Entity[] => {
             category: Category.Knee,
             country: County.Finland,
             century: 15,
+            material: "metal",
             meta: {
                 assetName: "Eiropa_obichnie.obj",
             }
@@ -104,6 +114,7 @@ export const fetchData = (): Entity[] => {
             category: Category.Sabatons,
             country: County.Finland,
             century: 15,
+            material: "metal",
             meta: {
                 assetName: "Latnie.obj",
                 position: {
@@ -118,6 +129,7 @@ export const fetchData = (): Entity[] => {
             category: Category.Shoulders,
             country: County.Finland,
             century: 15,
+            material: "metal",
             meta: {
                 assetName: "Segmentarnie.obj",
             }
@@ -127,6 +139,7 @@ export const fetchData = (): Entity[] => {
             category: Category.Thigh,
             country: County.Finland,
             century: 15,
+            material: "metal",
             meta: {
                 assetName: "Bedro.obj",
             }
@@ -134,6 +147,7 @@ export const fetchData = (): Entity[] => {
         {
             id: shortID.generate(),
             category: Category.Helmets,
+            material: "metal",
             country: County.Finland,
             century: 15,
             meta: {
@@ -208,7 +222,7 @@ export const getFilteredData = (data: Entity[], century: number, country: County
         });
 };
 
-export const getPositionByAssetName = (assetName: string, assets: Entity[]): BABAYLON.Vector3 => {
+export const getPosition = (assetName: string, assets: Entity[]): BABAYLON.Vector3 => {
     const item = assets.find(value => value.meta.assetName === assetName);
     if (item && item.meta.position) {
         const {x = 0, y = 0, z = 0} = item.meta.position;
