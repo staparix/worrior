@@ -2,41 +2,46 @@ import * as BABYLON from "babylonjs";
 import "babylonjs-loaders";
 import { MainManeken } from "../mockServer/assetLoader";
 
-let scene: BABYLON.Scene;
-export const bootstrap = (canvas: HTMLCanvasElement): Promise<void> => {
+type Bootstrap = {
+    engine: BABYLON.Engine,
+    scene: BABYLON.Scene,
+};
+export const bootstrap = (canvas: HTMLCanvasElement): Promise<Bootstrap> => {
     return new Promise((resolve) => {
         const engine = new BABYLON.Engine(canvas, true);
-        scene = createScene(engine, canvas);
+        const scene = createScene(engine, canvas);
         const renderLoop = () => {
             scene.render();
         };
         engine.runRenderLoop(renderLoop);
-        resolve();
+        resolve({
+            scene: scene,
+            engine: engine,
+        });
     });
 };
 
 export let assetsManager: BABYLON.AssetsManager;
 function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
-    const mainCamera = new BABYLON.Scene(engine);
-    // scene.createDefaultEnvironment({
-    //     createGround: true,
-    //     createSkybox: true,
-    // });
-    new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+    const mainScene = new BABYLON.Scene(engine);
+    createGround(mainScene);
+    (window as any)["enableDebugger"] =  () => {
+        mainScene.debugLayer.show();
+    }
+    new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), mainScene);
 
-    const camera = new BABYLON.ArcRotateCamera("Camera", 15, 15, 14, new BABYLON.Vector3(0, 6, 0), scene);
-
-    camera.upperBetaLimit = 1.1;
-    camera.lowerBetaLimit = 1.1;
+    const camera = new BABYLON.ArcRotateCamera("Camera", 15, 15, 14, new BABYLON.Vector3(0, 6, 0), mainScene);
+    const hdrTexture = new BABYLON.CubeTexture("/assets/studio024.hdr", mainScene);
+    mainScene.createDefaultSkybox(hdrTexture, true, 10000);
+    // camera.wheelPrecision = 10000;
+    // camera.upperBetaLimit = 1.1;
+    // camera.lowerBetaLimit = 1.1;
     camera.attachControl(canvas, true);
 
-    engine.enableOfflineSupport = true;
-
     // Assets manager
-    assetsManager = new BABYLON.AssetsManager(scene);
+    assetsManager = new BABYLON.AssetsManager(mainScene);
 
     const mainManeken = assetsManager.addMeshTask("base", "", "/assets/", MainManeken);
-
     mainManeken.onSuccess = (_) => {
         console.log("image loaded");
     };
@@ -48,7 +53,7 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
 
     assetsManager.onFinish = (_) => {
         engine.runRenderLoop(() => {
-            scene.render();
+            mainScene.render();
         });
     };
 
@@ -58,9 +63,11 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     // Just call load to initiate the loading sequence
     assetsManager.load();
 
-    return mainCamera;
+    return mainScene;
 }
 
-export const getMainScene = () => {
-    return scene;
-};
+function createGround(scene: BABYLON.SceneComponentConstants) {
+    return BABYLON.MeshBuilder.CreateGround("myGround", {
+        width: 6, height: 4
+    }, scene);
+}

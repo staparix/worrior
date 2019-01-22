@@ -6,9 +6,9 @@ type HeaderProps = {
     onCenturyChange: (event: any) => void;
     onCountrieChange: (event: any) => void;
     categories: Category[];
-    centuries: number[];
+    centuries: string[];
     countries: string[];
-    centuriesSelected: number | undefined;
+    centuriesSelected: string | undefined;
     categorySelected: Category | undefined;
     countrySelected: string | undefined;
 };

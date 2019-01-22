@@ -9,8 +9,19 @@ type ShoppingCartProps = {
 
 export class ShoppingCart extends React.Component<ShoppingCartProps> {
     public render() {
-        return this.props.selectedItems.map((item) => {
-            return <ShoppingItem onRemove={this.props.onItemRemove} item={item} key={item.id} />;
-        });
+        return (
+            <div>
+                <div>
+                    {
+                        this.props.selectedItems.map((item) => {
+                            return <ShoppingItem  onRemove={this.props.onItemRemove} item={item} key={item.id}/>;
+                        })
+                    }
+                </div>
+                <div>
+                    <button>Order</button>
+                </div>
+            </div>
+        );
     }
 }

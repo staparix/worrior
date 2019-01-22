@@ -1,10 +1,10 @@
 import * as BABAYLON from "babylonjs";
 import * as shortID from "shortid";
 
-export const MainManeken = "m.obj";
+export const MainManeken = "test.babylon";
 
 export enum County {
-    Finland = "Finland",
+    Finland = "Country",
     Italy = "Italy",
 }
 
@@ -21,13 +21,16 @@ export enum Category {
     Sabatons = "Sabatons",
     Shoulders = "Shoulders",
     Thigh = "Thigh",
+    Wrist = "Wrist",
+    Neck = "Neck",
+    Sword = "Sword",
 }
 
 export type Entity = {
     id: string,
     category: Category;
     country: County;
-    century: number;
+    century: string;
     material?: "metal",
     meta: {
         assetName: string;
@@ -45,7 +48,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Body,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             meta: {
                 assetName: "body_1.obj"
             }
@@ -55,7 +58,7 @@ export const fetchData = (): Entity[] => {
             category: Category.Calf,
             material: "metal",
             country: County.Finland,
-            century: 15,
+            century: "Century",
             meta: {
                 assetName: "Dvustvor_nepolnie.obj"
             }
@@ -64,7 +67,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Elbows,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             material: "metal",
             meta: {
                 assetName: "Eiropa.obj",
@@ -79,7 +82,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Forearm,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             material: "metal",
             meta: {
                 assetName: "Eiropa_naruch.obj",
@@ -94,7 +97,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Knee,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             material: "metal",
             meta: {
                 assetName: "Eiropa_obichnie.obj",
@@ -104,7 +107,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Trapka,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             meta: {
                 assetName: "podlatnik.obj",
             }
@@ -113,7 +116,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Sabatons,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             material: "metal",
             meta: {
                 assetName: "Latnie.obj",
@@ -128,7 +131,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Shoulders,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             material: "metal",
             meta: {
                 assetName: "Segmentarnie.obj",
@@ -138,7 +141,7 @@ export const fetchData = (): Entity[] => {
             id: shortID.generate(),
             category: Category.Thigh,
             country: County.Finland,
-            century: 15,
+            century: "Century",
             material: "metal",
             meta: {
                 assetName: "Bedro.obj",
@@ -149,9 +152,58 @@ export const fetchData = (): Entity[] => {
             category: Category.Helmets,
             material: "metal",
             country: County.Finland,
-            century: 15,
+            century: "Century",
             meta: {
                 assetName: "Nanosnik.obj",
+            }
+        },
+        {
+            id: shortID.generate(),
+            category: Category.Helmets,
+            material: "metal",
+            country: County.Finland,
+            century: "Century",
+            meta: {
+                assetName: "Helm_Barbjut .obj",
+            }
+        },
+        {
+            id: shortID.generate(),
+            category: Category.Helmets,
+            material: "metal",
+            country: County.Finland,
+            century: "Century",
+            meta: {
+                assetName: "Helm_grandhelm.obj",
+            }
+        },
+        {
+            id: shortID.generate(),
+            category: Category.Wrist,
+            material: "metal",
+            country: County.Finland,
+            century: "Century",
+            meta: {
+                assetName: "Wrist_Milan .obj",
+            }
+        },
+        {
+            id: shortID.generate(),
+            category: Category.Neck,
+            country: County.Finland,
+            century: "Century",
+            meta: {
+                assetName: "test.babylon",
+            }
+        },
+        {
+            id: shortID.generate(),
+            category: Category.Sword,
+            material: "metal",
+            country: County.Finland,
+            century: "Century",
+            meta: {
+                assetName: "Sword.obj",
             }
         },
     ];
@@ -169,7 +221,7 @@ export function findByCategory(category: Category, entries: Entity[]) {
     return entries.filter(entry => entry.category === category);
 }
 
-export function findByCentry(century: number, entries: Entity[]) {
+export function findByCentry(century: string, entries: Entity[]) {
     return entries.filter(entry => entry.century === century);
 }
 
@@ -187,7 +239,7 @@ export function getAllCategories(entries: Entity[]) {
 
 export function getAllCenturies(entries: Entity[]) {
     const filter: any = {};
-    return entries.reduce<number[]>((result, item) => {
+    return entries.reduce<string[]>((result, item) => {
         if (!filter[item.century]) {
             filter[item.century] = item.century;
             result.push(item.century);
@@ -209,7 +261,7 @@ export function getAllCountry(entries: Entity[]) {
     }, []);
 }
 
-export const getFilteredData = (data: Entity[], century: number, country: County, category: Category) => {
+export const getFilteredData = (data: Entity[], century: string, country: County, category: Category) => {
     return data
         .filter((item) => {
             return item.century === century;

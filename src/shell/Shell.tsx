@@ -4,7 +4,7 @@ import { jsx } from "@emotion/core";
 import { container, headerNav, mainContainer, openedShoppingCart, sideMenu, submitStyle } from "./shell-styles";
 import { SideMenu } from "./SideMenu";
 import { MainView } from "./MainView";
-import { assetsManager, bootstrap, getMainScene } from "./mainView3D";
+import { bootstrap } from "./main-engine";
 import { Header } from "../components/Header";
 import {
     Category,
@@ -19,43 +19,27 @@ import {
 } from "../mockServer/assetLoader";
 import { ExportButton } from "../components/ExportButton";
 import { ShoppingCart } from "../shopingCart/ShoppingCart";
-import { applyMateril } from "../materials";
+// @ts-ignore
+import { createMetal } from "../materials";
 
 export const loadedOnTheScene: { [key: string]: BABYLON.AbstractMesh } = {};
 
-function loadAssetFromApi(item: Entity) {
-    const {meta: { assetName }, id, material} = item;
-    const meshTask = assetsManager.addMeshTask(assetName, "", "/assets/", assetName);
-    meshTask.onSuccess = (task) => {
-        const mesh = task.loadedMeshes[0];
-        if (material === "metal") {
-            applyMateril(mesh, getMainScene());
-        }
-        loadedOnTheScene[id] = task.loadedMeshes[0];
-    };
-    assetsManager.load();
-}
+
 
 function uniqueArray<T>(arr: T[]): T[] {
     return Array.from(new Set<T>(arr));
 }
 
-function replaceAsset(prevAsset: Entity, newAsset: Entity) {
-    if (loadedOnTheScene[prevAsset.id]) {
-        loadedOnTheScene[prevAsset.id].dispose();
-    }
-    loadAssetFromApi(newAsset);
-}
 
 type ShellState = {
     readonly data: Entity[];
     readonly shoppingCartOpened: boolean;
     readonly selectedItemsIds: string[];
     readonly categories: Category[];
-    readonly centuries: number[];
+    readonly centuries: string[];
     readonly countries: County[];
     readonly selectedCategory: Category | undefined,
-    readonly selectedCentury: number | undefined,
+    readonly selectedCentury: string | undefined,
     readonly selectedCountry: County | undefined,
 };
 
@@ -71,9 +55,16 @@ export class Shell extends React.Component<{}, ShellState> {
         selectedCentury: undefined,
         selectedCountry: undefined,
     };
+    private scene!: BABYLON.Scene;
+    // @ts-ignore
+    private engine!: BABYLON.Engine;
+    private metal!: BABYLON.PBRMaterial;
 
     public componentDidMount(): void {
-        bootstrap(document.getElementById("main-view")! as HTMLCanvasElement).then(() => {
+        bootstrap(document.getElementById("main-view")! as HTMLCanvasElement).then((app) => {
+            this.scene = app.scene;
+            this.engine = app.engine;
+            this.metal = createMetal(this.scene);
             const data = fetchData();
             const categories = getAllCategories(data);
             const centuries = getAllCenturies(data);
@@ -145,7 +136,7 @@ export class Shell extends React.Component<{}, ShellState> {
         this.setState({selectedCategory: item.target.value});
     }
     private onCenturyChange = (item: any) => {
-        this.setState({selectedCentury: Number(item.target.value)});
+        this.setState({selectedCentury: item.target.value});
     };
     private onCountryChange = (item: any) => {
         this.setState({selectedCountry: item.target.value});
@@ -189,17 +180,38 @@ export class Shell extends React.Component<{}, ShellState> {
         });
 
         if (toReplaceId) {
-            replaceAsset(getById(toReplaceId, data)!, itemData);
+            this.replaceAsset(getById(toReplaceId, data)!, itemData);
             this.setState({
                 selectedItemsIds: uniqueArray([...selectedItemsIds.filter((iID) => toReplaceId !== iID), id])
             });
             return;
         }
 
-        loadAssetFromApi(itemData);
+        this.loadAssetFromApi(itemData);
         this.setState({
             selectedItemsIds: uniqueArray([...selectedItemsIds, id])
         });
     };
+
+    private loadAssetFromApi = (item: Entity) => {
+        const {meta: { assetName }, id, material } = item;
+        const assetsManager = new BABYLON.AssetsManager(this.scene);
+        const meshTask = assetsManager.addMeshTask(assetName, "", "/assets/", assetName);
+        meshTask.onSuccess = (task) => {
+            const mesh = task.loadedMeshes[0];
+            if (material === "metal") {
+                mesh.material = this.metal;
+            }
+            loadedOnTheScene[id] = task.loadedMeshes[0];
+        };
+        assetsManager.load();
+    };
+
+    private replaceAsset(prevAsset: Entity, newAsset: Entity) {
+        if (loadedOnTheScene[prevAsset.id]) {
+            loadedOnTheScene[prevAsset.id].dispose();
+        }
+        this.loadAssetFromApi(newAsset);
+    }
 
 }
