@@ -12,7 +12,9 @@
     "clear": "rm -rf ./dist",
     "build:dev": "yarn clear && webpack --env.mode development",
     "build:prod": "yarn clear && webpack --env.mode production",
-    "start": "webpack-dev-server --env.mode development --watch --hot"
+    "start": "webpack-dev-server --env.mode development --watch --hot",
+    "server": "webpack --config ./webpack.server.config.js --watch --env.mode development",
+    "format": "prettier src/**/*.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,10 +29,16 @@
     "babel-cli": "^6.26.0",
     "babel-loader": "^8.0.4",
     "babel-plugin-emotion": "^10.0.4",
+    "babylonjs-make-incremental": "^3.1.1",
     "copy-webpack-plugin": "^4.6.0",
+    "css-loader": "^3.0.0",
     "file-loader": "^2.0.0",
     "html-webpack-plugin": "^4.0.0-beta.4",
+    "imagemin-webpack-plugin": "^2.4.0",
+    "prettier": "1.16.4",
     "react-hot-loader": "^4.3.12",
+    "resource-hints-webpack-plugin": "^0.0.2",
+    "style-loader": "^0.23.1",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.11.1",
     "tslint-eslint-rules": "^5.4.0",
@@ -43,10 +51,13 @@
   "dependencies": {
     "babylonjs": "^4.0.0-alpha.11",
     "babylonjs-loaders": "^3.3.0",
+    "http-server": "^0.11.1",
     "mobx": "^5.7.0",
     "mobx-react": "^5.4.2",
+    "pepjs": "^0.4.3",
     "react": "^16.7.0-alpha.2",
     "react-dom": "^16.7.0-alpha.2",
+    "react-picky": "^4.5.1",
     "shortid": "^2.2.14"
   }
 }

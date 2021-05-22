@@ -1,46 +1,46 @@
 import { css } from "@emotion/core";
 
-export const mainContainer = css`
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-    width: 700px;
-    margin: 0 auto;
-    border-radius: 6px;
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
-`;
 export const container = css`
   display: flex;
-  height: 500px;
-  margin-bottom: 10%;
+  height: 90%;
+`;
+
+export const canvasView = css`
+  height: 100%;
 `;
 
 export const headerNav = css`
   padding: 10px;
   background-color: #1f2323;;
   text-align: right;
-`;
-
-export const openedShoppingCart = css`
-   transform: translate(0, 5%);
-`;
-
-export const submitStyle = css`
-  text-align: center;
-  padding: 10px;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background-color: rgba(255,255,255, 0.8);
-  transform: translate(0, 90%);
-  transition: transform 0.3s;
+  margin-right: 30%;
+  display: flex;
+  justify-content: space-around;
+`;
+
+export const loading = css`
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 46px;
+    color: #ffff;
+    z-index: 2;
 `;
 
 export const sideMenu = css`
-  width:  100%;
+  width: 30%;
   text-align: center;
   overflow-y: scroll;
-  max-height: 500px;
+  max-height: 600px;
 `

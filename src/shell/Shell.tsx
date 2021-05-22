@@ -1,217 +1,242 @@
 /** @jsx jsx */
-import * as React from "react";
+import { useEffect } from "react";
 import { jsx } from "@emotion/core";
-import { container, headerNav, mainContainer, openedShoppingCart, sideMenu, submitStyle } from "./shell-styles";
-import { SideMenu } from "./SideMenu";
-import { MainView } from "./MainView";
-import { bootstrap } from "./main-engine";
+import * as st from "./shell-styles";
+import { SideMenu } from "../components/sideMenu/SideMenu";
+import { MainView } from "./Main";
+import { bootstrap } from "./bootstrap";
 import { Header } from "../components/Header";
 import {
     Category,
-    County,
     Entity,
-    fetchData,
-    getAllCategories,
-    getAllCenturies,
-    getAllCountry,
-    getById,
-    getFilteredData
-} from "../mockServer/assetLoader";
-import { ExportButton } from "../components/ExportButton";
-import { ShoppingCart } from "../shopingCart/ShoppingCart";
-// @ts-ignore
-import { createMetal } from "../materials";
+    getModelId,
+} from "../domain";
+import { ShoppingCart } from "../components/shopingCart/ShoppingCart";
+import { Container } from "../components/containers/Container";
+import { AdditionalMenu } from "../components/additionalMenu/AditionalMenu";
+import { Footer } from "../components/footer/Footer";
+import { SelectionMenu } from "../components/selectionMenu/SelectionMenu";
+import { toOptions } from "../utils/domainUtils";
+import { Sections, useShellState } from "../shell/hooks/useShellState";
 
-export const loadedOnTheScene: { [key: string]: BABYLON.AbstractMesh } = {};
+type Models = { [key: string]: BABYLON.AbstractMesh; };
+let models: Models = {};
+const loadedModels: Models = {};
 
-
-
-function uniqueArray<T>(arr: T[]): T[] {
-    return Array.from(new Set<T>(arr));
-}
-
-
-type ShellState = {
-    readonly data: Entity[];
-    readonly shoppingCartOpened: boolean;
-    readonly selectedItemsIds: string[];
-    readonly categories: Category[];
-    readonly centuries: string[];
-    readonly countries: County[];
-    readonly selectedCategory: Category | undefined,
-    readonly selectedCentury: string | undefined,
-    readonly selectedCountry: County | undefined,
-};
-
-export class Shell extends React.Component<{}, ShellState> {
-    public state: ShellState = {
-        shoppingCartOpened: false,
-        data: [],
-        selectedItemsIds: [],
-        categories: [],
-        centuries: [],
-        countries: [],
-        selectedCategory: undefined,
-        selectedCentury: undefined,
-        selectedCountry: undefined,
-    };
-    private scene!: BABYLON.Scene;
+export function Shell() {
+    const shellState = useShellState();
+    let scene!: BABYLON.Scene;
     // @ts-ignore
-    private engine!: BABYLON.Engine;
-    private metal!: BABYLON.PBRMaterial;
+    let engine!: BABYLON.Engine;
 
-    public componentDidMount(): void {
+    useEffect(() => {
         bootstrap(document.getElementById("main-view")! as HTMLCanvasElement).then((app) => {
-            this.scene = app.scene;
-            this.engine = app.engine;
-            this.metal = createMetal(this.scene);
-            const data = fetchData();
-            const categories = getAllCategories(data);
-            const centuries = getAllCenturies(data);
-            const countries = getAllCountry(data);
-            this.setState({
+            scene = app.scene;
+            engine = app.engine;
+            loadScreen(scene);
+            shellState.services.initData({
                 shoppingCartOpened: false,
-                categories: categories,
-                centuries: centuries,
-                countries: countries,
-                selectedCategory: categories[0],
-                selectedCentury: centuries[0],
-                selectedCountry: countries[0],
-                data: data,
+                categories: app.categories,
+                centuries: app.centuries,
+                selectedCategory: app.categories[0].id,
+                data: app.models,
+                normalizedEntities: app.normalizedEntities,
             });
         });
-    }
-
-    public render() {
-        return (
-            <div css={mainContainer}>
-                <div css={headerNav}>
-                    <Header
-                        centuriesSelected={this.state.selectedCentury}
-                        categorySelected={this.state.selectedCategory}
-                        countrySelected={this.state.selectedCountry}
-                        categories={this.state.categories}
-                        centuries={this.state.centuries}
-                        countries={this.state.countries}
-                        onCategoryChange={this.onCategoryChange}
-                        onCenturyChange={this.onCenturyChange}
-                        onCountrieChange={this.onCountryChange}
+    }, [false]);
+    const {
+        loading,
+        ussaChecked,
+        usaChecked,
+        categories,
+        openedSection,
+        centuries,
+        selectedCentury,
+    } = shellState.model;
+    const centurieOptions = toOptions(centuries);
+    const renderSection = (section: Sections) => {
+        const { selectedCategory, selectedItemsIds } = shellState.model;
+        switch (section) {
+            case Sections.Category:
+                return (
+                    <SelectionMenu
+                        data={ shellState.services.getData() }
+                        onSelect={ onSelectedItem }
+                        category={ selectedCategory }
                     />
-                </div>
-                <div>
-                    <div css={container}>
-                        <MainView/>
-                        <div css={sideMenu}>
-                            <SideMenu
-                                loadAsset={this.loadAssetFromServer}
-                                data={getFilteredData(
-                                    this.state.data,
-                                    this.state.selectedCentury!,
-                                    this.state.selectedCountry!,
-                                    this.state.selectedCategory!,)}
-                            />
-                        </div>
-                    </div>
-                    <div css={[submitStyle, this.state.shoppingCartOpened ? openedShoppingCart : null]}>
-                        <ExportButton
-                            label={
-                                this.state.shoppingCartOpened ?
-                                    "Close" : `Show selected ${this.state.selectedItemsIds.length}`
-                            }
-                            onClick={this.toggleShoppingCart}
+                );
+            case Sections.Ordering:
+                return (
+                    <div style={ { padding: 25, height: "100%", overflow: "scroll" } }>
+                        <ShoppingCart
+                            onOrder={ orderRequest }
+                            onItemRemove={ onItemRemoveFromShoppingCart }
+                            selectedItems={ getSelectedEntities(selectedItemsIds) }
                         />
-                        <div style={{padding: 25}}>
-                            <ShoppingCart
-                                onItemRemove={this.onItemRemoveFromShoppingCart}
-                                selectedItems={this.getSelectedEntities(this.state.selectedItemsIds)}
-                            />
-                        </div>
                     </div>
-                </div>
-            </div>
-        );
-    }
-
-    private onCategoryChange = (item: any) => {
-        this.setState({selectedCategory: item.target.value});
-    }
-    private onCenturyChange = (item: any) => {
-        this.setState({selectedCentury: item.target.value});
-    };
-    private onCountryChange = (item: any) => {
-        this.setState({selectedCountry: item.target.value});
-    };
-    private toggleShoppingCart = () => {
-        this.setState((prevState) => {
-            return {
-                shoppingCartOpened: !prevState.shoppingCartOpened,
-            };
-        });
-    };
-    private onItemRemoveFromShoppingCart = (itemToRemove: Entity) => {
-        const mesh = loadedOnTheScene[itemToRemove.id];
-        if (mesh) {
-            mesh.dispose();
-            delete loadedOnTheScene[itemToRemove.id];
-            this.setState((prevState) => {
-                const selectedItems = prevState.selectedItemsIds.filter(id => id !== itemToRemove.id);
-                return {
-                    selectedItemsIds: selectedItems,
-                };
-            });
+                );
+            default:
+                return null;
         }
     };
-    private getSelectedEntities = (selectedIds: string[]) => {
-        return this.state.data.filter((item) => {
+
+    const onUssaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        shellState.services.setUssaCheckbox(e.target.checked);
+    };
+    // @ts-ignore
+    const onUsaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        shellState.services.setUsaCheckbox(e.target.checked);
+    };
+
+    const openOrderSection = () => {
+        openSection(Sections.Ordering);
+    };
+
+    const onSectionClose = () => {
+        openSection(Sections.Main);
+    };
+
+    const openSection = (section: Sections) => {
+        shellState.services.openSection(section);
+    };
+
+    const onItemRemoveFromShoppingCart = (itemToRemove: Entity) => {
+        hideModel(getModel(itemToRemove));
+        shellState.services.removeItemFromSelected(itemToRemove);
+    };
+    const getSelectedEntities = (selectedIds: Entity["id"][]) => {
+        return shellState.model.data.filter((item) => {
             return selectedIds.indexOf(item.id) !== -1;
         });
     };
 
-    private loadAssetFromServer = (id: string) => {
-        const {data, selectedItemsIds} = this.state;
-        const itemData = getById(id, data);
-        if (!itemData || selectedItemsIds.indexOf(id) !== -1) {
+    const onCategorySelect = (category: Category) => {
+        openSection(Sections.Category);
+        shellState.services.setSelectedCategory(category.id);
+    };
+
+    const showModel = (mesh: BABYLON.AbstractMesh) => {
+        if (!loadedModels[mesh.name]) {
+            shellState.services.setLoading(true);
+        }
+        mesh.visibility = 1;
+    };
+    // @ts-ignore
+    const onSelectedItem = (selectedItem: Entity) => {
+        openSection(Sections.Main);
+        const normData = shellState.model.normalizedData;
+        const { selectedItemsIds } = shellState.model;
+        if (selectedItemsIds.indexOf(getModelId(selectedItem)) !== -1) {
             return;
         }
+        shellState.services.updateFilter(selectedItem);
 
         const toReplaceId = selectedItemsIds.find((itemID) => {
-            const item = getById(itemID, data);
-            return item ? item.category === itemData.category : false;
+            const item = normData[itemID];
+            return item ? item.category === selectedItem.category : false;
         });
 
         if (toReplaceId) {
-            this.replaceAsset(getById(toReplaceId, data)!, itemData);
-            this.setState({
-                selectedItemsIds: uniqueArray([...selectedItemsIds.filter((iID) => toReplaceId !== iID), id])
-            });
+            replaceAsset(normData[toReplaceId], selectedItem);
+            showModel(getModel(selectedItem));
             return;
         }
 
-        this.loadAssetFromApi(itemData);
-        this.setState({
-            selectedItemsIds: uniqueArray([...selectedItemsIds, id])
+        addToTheScene(selectedItem);
+    };
+
+    const replaceAsset = (prevAsset: Entity, newAsset: Entity) => {
+        if (prevAsset.category === newAsset.category) {
+            hideModel(models[prevAsset.meshName]);
+        }
+        shellState.services.replace(prevAsset, newAsset);
+    };
+
+    const addToTheScene = (item: Entity) => {
+        showModel(getModel(item));
+        shellState.services.addSelectedItems(item);
+    };
+
+    const hideModel = (mesh: BABYLON.AbstractMesh) => {
+        mesh.visibility = 0;
+    };
+
+    const getModel = (item: Entity) => {
+        return models[item.meshName];
+    };
+
+    const orderRequest = () => {
+        const orderModels = shellState.model.selectedItemsIds.map(id => shellState.model.normalizedData[id]);
+        window.MainManikenUrlTarget.onOrder({
+            selected: JSON.stringify(orderModels)
         });
     };
 
-    private loadAssetFromApi = (item: Entity) => {
-        const {meta: { assetName }, id, material } = item;
-        const assetsManager = new BABYLON.AssetsManager(this.scene);
-        const meshTask = assetsManager.addMeshTask(assetName, "", "/assets/", assetName);
-        meshTask.onSuccess = (task) => {
-            const mesh = task.loadedMeshes[0];
-            if (material === "metal") {
-                mesh.material = this.metal;
-            }
-            loadedOnTheScene[id] = task.loadedMeshes[0];
+    const loadScreen = (s: BABYLON.Scene) => {
+        const assetsManager = new BABYLON.AssetsManager(s);
+        s.onDataLoadedObservable.add(() => {
+            shellState.services.setLoading(false);
+        });
+        s.onMeshImportedObservable.add((mesh) => {
+            loadedModels[mesh.name] = mesh;
+        });
+        const mainModel = assetsManager
+            .addMeshTask(
+                "base",
+                "",
+                (window as any).MainManikenUrlTarget.modelRoot,
+                "armor.incremental.babylon"
+            );
+        mainModel.onSuccess = (task) => {
+            models = task.loadedMeshes.reduce<Models>((result, mesh) => {
+                if (mesh.name === "Podlatnik_red" || mesh.name === "Maniken") {
+                    mesh.visibility = 1;
+                } else {
+                    mesh.visibility = 0;
+                }
+                result[mesh.name] = mesh;
+                return result;
+            }, {});
+            shellState.services.setLoading(false);
         };
+        assetsManager.onTaskError = (_) => {
+            console.error("can not load image");
+        };
+
         assetsManager.load();
     };
 
-    private replaceAsset(prevAsset: Entity, newAsset: Entity) {
-        if (loadedOnTheScene[prevAsset.id]) {
-            loadedOnTheScene[prevAsset.id].dispose();
-        }
-        this.loadAssetFromApi(newAsset);
-    }
+    return (
+        <Container>
+            { loading && <div css={ st.loading }>Loading....</div> }
+            <div css={ st.headerNav }>
+                <Header
+                    onCenturyChange={ shellState.services.setSelectedCentury }
+                    selectedCentury={ selectedCentury }
+                    centuries={ centurieOptions }
+                    usaChecked={ usaChecked }
+                    ussaChecked={ ussaChecked }
+                    onUsaChange={ onUsaChange }
+                    onUssaChange={ onUssaChange }
+                />
+            </div>
+            <div css={ st.canvasView }>
+                <div css={ st.container }>
+                    <MainView/>
+                    <div css={ st.sideMenu }>
+                        <SideMenu
+                            stats={ shellState.services.getTotalItemsInCategory(shellState.services.getData()) }
+                            onMenuItemSelected={ onCategorySelect }
+                            data={ categories }
+                        />
+                    </div>
+                </div>
+                <Footer onOrderButtonClick={ openOrderSection }/>
+                <AdditionalMenu onClose={ onSectionClose } open={ openedSection !== Sections.Main }>
+                    { renderSection(openedSection) }
+                </AdditionalMenu>
+            </div>
+        </Container>
+    );
 
 }

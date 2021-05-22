@@ -1,38 +1,71 @@
+/** @jsx jsx */
 import * as React from "react";
-import { Category } from "../mockServer/assetLoader";
+import { css, jsx } from "@emotion/core";
+import { Option } from "../components/select/Select";
+import Select from "react-picky";
 
 type HeaderProps = {
-    onCategoryChange: (event: any) => void;
-    onCenturyChange: (event: any) => void;
-    onCountrieChange: (event: any) => void;
-    categories: Category[];
-    centuries: string[];
-    countries: string[];
-    centuriesSelected: string | undefined;
-    categorySelected: Category | undefined;
-    countrySelected: string | undefined;
+    centuries: Option[];
+    selectedCentury: Option[];
+    onCenturyChange: (c: any) => void;
+    usaChecked: boolean;
+    ussaChecked: boolean;
+    onUssaChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onUsaChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
+
+const headerStyle = css`
+  display: flex;
+  justify-content: space-around;
+`;
+
+const labelStyle = css`
+  color: #fff;
+`;
+
+const checkBox = css`
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+`;
 
 export class Header extends React.Component<HeaderProps> {
     public render() {
         return (
-            <div>
-                <select value={this.props.countrySelected} onChange={this.props.onCountrieChange} name="select_env">
-                    {this.renderOptions(this.props.countries)}
-                </select>
-                <select value={this.props.categorySelected} onChange={this.props.onCategoryChange} name="select_env">
-                    {this.renderOptions(this.props.categories)}
-                </select>
-                <select value={this.props.centuriesSelected} onChange={this.props.onCenturyChange} name="select_env">
-                    {this.renderOptions(this.props.centuries)}
-                </select>
+            <div css={ headerStyle }>
+                <div style={{ width: 120 }}>
+                    <Select
+                        numberDisplayed={2}
+                        placeholder="Century"
+                        valueKey="id"
+                        labelKey="displayName"
+                        dropdownHeight={200}
+                        multiple={true}
+                        options={this.props.centuries}
+                        includeSelectAll={false}
+                        value={this.props.selectedCentury}
+                        onChange={this.props.onCenturyChange}
+                    />
+                </div>
+                <div css={ checkBox }>
+                    <span css={ labelStyle }>Eastern</span>
+                    <input
+                        checked={ this.props.usaChecked }
+                        onChange={ this.props.onUsaChange }
+                        id="1"
+                        type="checkbox"
+                    />
+                </div>
+                <div css={ checkBox }>
+                    <span css={ labelStyle }>Western</span>
+                    <input
+                        checked={ this.props.ussaChecked }
+                        onChange={ this.props.onUssaChange }
+                        id="2"
+                        type="checkbox"
+                    />
+                </div>
             </div>
         );
-    }
-
-    private renderOptions = (items: any[]) => {
-        return items.map((item, index) => {
-            return <option value={item} key={index}>{item}</option>;
-        });
     }
 }

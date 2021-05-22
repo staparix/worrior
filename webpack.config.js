@@ -1,6 +1,8 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const ImageminPlugin = require("imagemin-webpack-plugin").default;
+const ResourceHintWebpackPlugin = require('resource-hints-webpack-plugin');
 
 module.exports = function (env, argv) {
     return {
@@ -18,11 +20,15 @@ module.exports = function (env, argv) {
         module: {
             rules: [
                 {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader'],
+                },
+                {
                     test: /\.tsx?$/,
                     include: [
                         path.resolve(__dirname, "src")
                     ],
-                    use:["babel-loader", "awesome-typescript-loader"]
+                    use: ["babel-loader", "awesome-typescript-loader"]
                 },
                 {
                     test: /\.(png|jpg|gif|obj|mtl|babylon)$/,
@@ -37,12 +43,14 @@ module.exports = function (env, argv) {
         },
         plugins: [
             new HtmlWebpackPlugin({
+                prefetch: ['**/*.*'],
                 title: "WB",
                 template: './src/index.html'
             }),
+            new ResourceHintWebpackPlugin(),
             new CopyWebpackPlugin([{
                 from: "assets", to: "assets"
-            }])
+            }]),
         ]
     }
 }
