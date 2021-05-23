@@ -2,8 +2,7 @@
 import * as React from "react";
 import { css, jsx } from "@emotion/core";
 import { Option } from "../components/select/Select";
-import Select from "react-picky";
-
+import { Picky }  from "react-picky";
 type HeaderProps = {
     centuries: Option[];
     selectedCentury: Option[];
@@ -34,7 +33,7 @@ export class Header extends React.Component<HeaderProps> {
         return (
             <div css={ headerStyle }>
                 <div style={{ width: 120 }}>
-                    <Select
+                    <Picky
                         numberDisplayed={2}
                         placeholder="Century"
                         valueKey="id"

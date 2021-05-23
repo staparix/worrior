@@ -1,7 +1,7 @@
-import * as BABYLON from "babylonjs";
 import { getAllCategories, getAllCenturies, getAllCountries, getAllModels } from "../utils/domainUtils";
 import { Category, Century, Country, Entity } from "../domain";
 import { normalizeEntities } from "../parsers/parsers";
+import * as BABYLON from "@babylonjs/core";
 
 type Bootstrap = {
     engine: BABYLON.Engine,
@@ -10,7 +10,7 @@ type Bootstrap = {
     countries: Country[],
     centuries: Century[],
     models: Entity[],
-    normalizedEntities: {[entitId: number]: Entity},
+    normalizedEntities: { [entitId: number]: Entity },
 };
 export const bootstrap = (canvas: HTMLCanvasElement): Promise<Bootstrap> => {
     return new Promise((resolve) => {
@@ -58,8 +58,9 @@ function configureCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
     camera.lowerBetaLimit = 1.55;
     camera.lowerRadiusLimit = 15;
     camera.upperRadiusLimit = 15;
-    camera.inputs.attached.mousewheel.detachControl(canvas);
+
     // @ts-ignore
+    camera.inputs.attached.mousewheel.detachControl(canvas);
 
     camera.attachControl(canvas, true);
 }

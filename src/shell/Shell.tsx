@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useEffect } from "react";
+import * as React  from "react";
 import { jsx } from "@emotion/core";
 import * as st from "./shell-styles";
 import { SideMenu } from "../components/sideMenu/SideMenu";
@@ -18,6 +18,7 @@ import { Footer } from "../components/footer/Footer";
 import { SelectionMenu } from "../components/selectionMenu/SelectionMenu";
 import { toOptions } from "../utils/domainUtils";
 import { Sections, useShellState } from "../shell/hooks/useShellState";
+import * as BABYLON from "@babylonjs/core";
 
 type Models = { [key: string]: BABYLON.AbstractMesh; };
 let models: Models = {};
@@ -27,9 +28,9 @@ export function Shell() {
     const shellState = useShellState();
     let scene!: BABYLON.Scene;
     // @ts-ignore
-    let engine!: BABYLON.Engine;
+    let engine!: Engine;
 
-    useEffect(() => {
+    React.useEffect(() => {
         bootstrap(document.getElementById("main-view")! as HTMLCanvasElement).then((app) => {
             scene = app.scene;
             engine = app.engine;

@@ -3,6 +3,8 @@ import { render } from "react-dom";
 import { Shell } from "./shell/Shell";
 import "react-picky/dist/picky.css";
 import "./warrior-styles.css";
+import "@babylonjs/loaders/glTF";
+import "@babylonjs/loaders/OBJ";
 
 window.InitWarrior = (id: string, options: Options = {}) => {
     if (!options.modelRoot) {
